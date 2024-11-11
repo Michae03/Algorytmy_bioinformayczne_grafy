@@ -68,6 +68,42 @@ bool isAdjoint(const Graph& graph) {
     return true;
 }
 
+bool isLinear(const Graph& graph) {
+    for(const auto& vertex : graph) {
+        if(vertex.second.next.size() > 1) {
+            //PIERWSZA STRUKTURA X->X, X->a->X
+            if(vertex.second.next.contains(vertex.first)) {
+                for(const auto &edge : vertex.second.next) {
+                    if(edge.first != vertex.first && edge.second->next.contains(vertex.first)) {
+                        return false;
+                    }
+                }
+            }
+            //DRUGA STRUKTURA X-a->X, X->b->X
+            for(const auto &a : vertex.second.next) {
+                for(const auto &b : vertex.second.next) {
+                    if(a.first != b.first && a.second->next.contains(vertex.first) && b.second->next.contains(vertex.first)) {
+                        return false;
+                    }
+                }
+            }
+            //TRZECIA STRUKTURA X->a->Y, X->b->Y
+            for(const auto &a : vertex.second.next) {
+                for(const auto &b : vertex.second.next) {
+                    if(a.first != b.first) {
+                        for(const auto &Y : a.second->next) {
+                            if(b.second->next.contains(Y.first)) {
+                                return false;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return true;
+}
+
 Graph transform(const Graph& graph) {
     using namespace std;
     Graph origin;
@@ -78,7 +114,6 @@ Graph transform(const Graph& graph) {
         empty.out = "_null";
         bridges.emplace(vertex.first, empty);
     }
-
     int names = 0;
     for(const auto &vertex : graph) {
         if(bridges.find(vertex.first)->second.in == "_null") {
@@ -136,7 +171,16 @@ int main()
 {
     using namespace std;
     Graph graph1 = getInput("C:/Users/micha/CLionProjects/Algorytmy Grafowe/graph");
-    getOutput(graph1);
-    isAdjoint(graph1) ? cout << "Jest sprzezony" << endl : cout << "Nie jest sprzezony" << endl;
-    if(isAdjoint(graph1)) {getOutput(transform(graph1));}
+    //getOutput(graph1);
+    if(isAdjoint(graph1)) {
+        if(isLinear(graph1)) {
+            cout<<"Graf jest sprzezony i liniowy"<<endl;
+        } else {
+            cout<<"Graf jest sprzezony ale nie jest liniowy"<<endl;
+        }
+        getOutput(transform(graph1));
+    } else {
+        cout<< "Graf nie jest sprzezony"<<endl;
+    }
+    return 0;
 }
