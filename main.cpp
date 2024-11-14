@@ -43,7 +43,7 @@ Graph getInput(const std::string &graphFileDirectory) {
         }
     }
     else {
-        std::cout << "Unable to open file";
+        std::cout << "Nie można otworzyć pliku";
     }
     return graph;
 }
@@ -155,7 +155,6 @@ void getOutput(const Graph& graph) {
         cout << pair.first << "[";
         const auto& vertex = pair.second;
         bool first = true;
-
         for (const auto& next_pair : vertex.next) {
             if (!first) {
                 cout << ",";
@@ -167,18 +166,45 @@ void getOutput(const Graph& graph) {
     }
 }
 
+void saveInFile(const Graph& graph, const std::string& fileName) {
+    using namespace std;
+    ofstream outFile(fileName, ios::out);
+    if (!outFile.is_open()) {
+        cerr << "Nie można otworzyć pliku" << endl;
+        return;
+    }
+    for (const auto& pair : graph) {
+        outFile << pair.first << "[";
+        const auto& vertex = pair.second;
+        bool first = true;
+        for (const auto& next_pair : vertex.next) {
+            if (!first) {
+                outFile << ",";
+            }
+            outFile << next_pair.first;
+            first = false;
+        }
+        outFile << "]" << endl;
+    }
+
+    outFile.close();
+    cout << "Graf zapisany pomyslnie do " << fileName << endl;
+}
+
 int main()
 {
     using namespace std;
     Graph graph1 = getInput("C:/Users/micha/CLionProjects/Algorytmy Grafowe/graph");
-    //getOutput(graph1);
+    getOutput(graph1);
     if(isAdjoint(graph1)) {
         if(isLinear(graph1)) {
             cout<<"Graf jest sprzezony i liniowy"<<endl;
         } else {
             cout<<"Graf jest sprzezony ale nie jest liniowy"<<endl;
         }
-        getOutput(transform(graph1));
+        Graph transformedGraph = transform(graph1);
+        getOutput(transformedGraph);
+        saveInFile(transformedGraph, "C:/Users/micha/CLionProjects/Algorytmy Grafowe/newGraph");
     } else {
         cout<< "Graf nie jest sprzezony"<<endl;
     }
